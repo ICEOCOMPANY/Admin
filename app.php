@@ -18,8 +18,6 @@ $app->get("/auth",function() use ($app){
     $app->response = (new \Controllers\Core\Auth($app))->getCurrentUser();
 });
 
-
-
 /**
  * USERS
  */

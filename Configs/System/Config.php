@@ -10,9 +10,9 @@ return new \Phalcon\Config(array(
     'database' => array(
         'adapter'    => 'Mysql',
         'host'       => 'core.iceo.zone',
-        'username'   => 'phalcon',
-        'password'   => 'ZY5ZUsDTtee4UXQ8',
-        'dbname'     => 'phalcon',
+        'username'   => 'root',
+        'password'   => 'aGS4dmLJRTs9k4B',
+        'dbname'     => 'system',
         'charset'    => 'utf8',
     ),
 
