@@ -53,6 +53,8 @@ class Users extends \Phalcon\Mvc\Model
             "id",
             array('alias' => 'groups')
         );
+
+        $this->hasOne("id", "Models\Core\PersonsDetails", "user_id",array('alias' => 'details'));
     }
 
     /**

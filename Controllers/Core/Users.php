@@ -12,9 +12,11 @@
 
 namespace Controllers\Core;
 
-class Users extends \Base\Controller {
+class Users extends \Base\Controller
+{
 
-    public function init(){
+    public function init()
+    {
         $this->config = new \Configs\Core\Users();
     }
 
@@ -24,14 +26,15 @@ class Users extends \Base\Controller {
      *
      * @return \Helpers\Response
      */
-    public function create(){
+    public function create()
+    {
 
         // Tworze uzytkownika
         $user = new \Models\Core\Users();
         $user->setRegistered();
 
         $user->setActive(
-            ($this->config->getRequireEmailActivation())?0:1
+            ($this->config->getRequireEmailActivation()) ? 0 : 1
         );
 
         $user->setPermissions(
@@ -41,9 +44,9 @@ class Users extends \Base\Controller {
         // Przypisuje dane do uzytkownika z posta
         $result = $this->setUserData($user);
 
-        if($result){
+        if ($result) {
 
-            if($this->config->getRequireEmailActivation()){
+            if ($this->config->getRequireEmailActivation()) {
                 $activationKey = \Helpers\String::generateRandomString(20);
 
                 $activationKeyModel = new \Models\Core\UsersActivationKeys();
@@ -60,7 +63,7 @@ class Users extends \Base\Controller {
                     'activation_key' => $activationKey
                 );
 
-                $mailer->SendTemplateEmail("registered",$vars,"",$user->getEmail(),"Success");
+                $mailer->SendTemplateEmail("registered", $vars, "", $user->getEmail(), "Success");
 
             }
 
@@ -70,14 +73,15 @@ class Users extends \Base\Controller {
     }
 
 
-    public function activateAccount(){
+    public function activateAccount()
+    {
 
         $activateKey = \Models\Core\UsersActivationKeys::findFirst(array(
             "key = :key:",
             "bind" => array("key" => $this->request->getPostVar("key"))
         ));
 
-        if($activateKey){
+        if ($activateKey) {
             $userId = $activateKey->getUserId();
             $activateKey->delete();
 
@@ -87,17 +91,17 @@ class Users extends \Base\Controller {
                 $this->getPermissions()->getDefaultForActivated()
             );
 
-            if($userModel->save())
+            if ($userModel->save())
                 $this->response->setConfirmOperationMessage(
                     $this->config->getMsgByCode(2)
                 );
 
-        }else
+        } else
             $this->response
                 ->setCode(406)
                 ->setJsonErrors(array(
-                        $this->config->getMsgByCode(1)
-                    ));
+                    $this->config->getMsgByCode(1)
+                ));
 
         return $this->response;
     }
@@ -109,7 +113,8 @@ class Users extends \Base\Controller {
      * @param $id - id uzytkownika
      * @return \Helpers\Response
      */
-    public function edit(){
+    public function edit()
+    {
         // Sprawdzam, czy jest zalogowany i ma uprawnienia do zmiany danych
 
         $user = $this->getDI()->get("user");
@@ -132,7 +137,8 @@ class Users extends \Base\Controller {
      * @param $email - email uzytkownika
      * @return \Helpers\Response
      */
-    public function resetPasswordPOST(){
+    public function resetPasswordPOST()
+    {
 
         // Filtruje email pod wzgledem poprawnosci
         //$email = (new \Phalcon\Filter())->sanitize($email, "email");
@@ -141,7 +147,7 @@ class Users extends \Base\Controller {
         // Szukam uzytkownika o podanym mailu
         $user = \Models\Core\Users::findFirstByEmail($email);
 
-        if(!$user){
+        if (!$user) {
 
             // Nie znalazlo uzytkownika - zwracam blad
             $this->response
@@ -156,9 +162,9 @@ class Users extends \Base\Controller {
 
             // Tworze klucz resetowania hasla
             $reset_key = new \Models\Core\PasswordsResetKeys();
-            $reset_key ->setUserId($user->getId())
-                       ->setResetKeyForUser($user->getId())
-                       ->setExpirationTime();
+            $reset_key->setUserId($user->getId())
+                ->setResetKeyForUser($user->getId())
+                ->setExpirationTime();
 
             if (!$reset_key->save()) {
 
@@ -184,7 +190,7 @@ class Users extends \Base\Controller {
                     'key' => $reset_key->getResetKey()
                 );
 
-                $mailer->SendTemplateEmail("resetpassword",$vars,"",$user->getEmail(),"Success");
+                $mailer->SendTemplateEmail("resetpassword", $vars, "", $user->getEmail(), "Success");
 
 
             }
@@ -200,7 +206,8 @@ class Users extends \Base\Controller {
      *
      * @return \Helpers\Response
      */
-    public function resetPasswordPUT(){
+    public function resetPasswordPUT()
+    {
 
         $reset_key = $this->request->getPutVar('key');
         // Sprawdzam, czy klucz istnieje w bazie
@@ -209,7 +216,7 @@ class Users extends \Base\Controller {
             "bind" => array("reset_key" => $reset_key)
         ));
 
-        if(!$reset_key){
+        if (!$reset_key) {
 
             // Klucz nie istnieje - zwracam blad
             $this->response
@@ -225,7 +232,7 @@ class Users extends \Base\Controller {
             // Pobieram uzytkownika
             $user = \Models\Core\Users::findFirstById($reset_key->getUserId());
 
-            if(!$user){
+            if (!$user) {
 
                 // Nie znaleziono uzytkownika - zwracam blad
                 $this->response
@@ -239,14 +246,14 @@ class Users extends \Base\Controller {
                 // Znaleziono uzytkownika - ide dalej
 
                 // Ustawiam nowe haslo
-                if(!$user->setPassword($this->request->getPutVar('new_password'))){
+                if (!$user->setPassword($this->request->getPutVar('new_password'))) {
                     $this->response
                         ->setCode(409)
                         ->setJsonErrors(array(
                             $this->config->getMsgByCode(9)
                         ));
                 } else {
-                    if(!$user->save()){
+                    if (!$user->save()) {
 
                         // Nie udalo sie zmienic hasla - wyswietlam bledy
                         $errors = array();
@@ -270,18 +277,48 @@ class Users extends \Base\Controller {
         return $this->response;
     }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////   PRYWATNE
+    /**
+     * GET
+     * Pobieranie szczegołowych danych o użytkowniku
+     *
+     * @return \Helpers\Response
+     */
+    public function detailsAction()
+    {
+
+        $users = \Models\Core\Users::find();
+
+        $usersData = [];
+
+
+        foreach ($users as $user) {
+            //Jeżeli user ma rekord w tabeli ze szczegółowymi danymi
+            $details = $user->details;
+
+            if ($details) {
+                array_push($usersData, $this->getUsersData($details));
+            }
+        }
+
+        $this->response->setCode(200)->setJson(array("data", $usersData));
+        return $this->response;
+
+    }
+
+//=========== HELPERS ============/
 
     /**
      * Ustawia dane dla uzytkownika (dla posta i puta)
      *
      * @param $user - obiekt uzytkownia
+     * @return int $userId - id usera
      */
-    private function setUserData($user){
+    private function setUserData($user)
+    {
         // Pobieram dane z posta
-        foreach($this->request->getPost() as $key => $value){
+        foreach ($this->request->getPost() as $key => $value) {
             $setter_name = "set" . ucfirst($key);
-            if(method_exists($user ,$setter_name)){
+            if (method_exists($user, $setter_name)) {
                 $user->{$setter_name}($this->request->getPostVar($key));
             }
         }
@@ -309,6 +346,24 @@ class Users extends \Base\Controller {
 
             return $user->getId();
         }
+    }
+
+    private function getUsersData($details){
+
+        return array(
+            "name" => $details->getName(),
+            "surname" => $details->getSurname(),
+            "birthdate" => $details->getBirthdate(),
+            "street" => $details->getStreet(),
+            "home" => $details->getHome(),
+            "local" => $details->getLocal(),
+            "postcode" => $details->getPostcode(),
+            "city" => $details->getCity(),
+            "country" => ($details->country) ? $details->country->getShortcut() : null,
+            "pesel" => $details->getPesel(),
+            "phone" => $details->getPhone()
+        );
+
     }
 
 }

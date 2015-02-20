@@ -46,6 +46,11 @@ $app->put("/users/password", function() use ($app){
     $app->response = (new \Controllers\Core\Users())->resetPasswordPUT();
 });
 
+$app->get("/user/details", function() use ($app){
+
+    $app->response = (new \Controllers\Core\Users())->detailsAction();
+
+});
 
 
 /**
