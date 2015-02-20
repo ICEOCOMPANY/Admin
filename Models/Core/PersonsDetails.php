@@ -85,6 +85,7 @@ class PersonsDetails extends \Phalcon\Mvc\Model
 
     public function initialize(){
 
+        $this->setSource("persons_details");
         $this->hasOne("user_id", "Models\Core\Users", "id");
         $this->belongsTo("country_id", "Models\Core\Countries", "id", array("alias" => "country"));
 

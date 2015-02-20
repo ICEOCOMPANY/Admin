@@ -25,6 +25,7 @@ class Countries extends \Phalcon\Mvc\Model
 
     public function initialize(){
 
+        $this->setSource("countries");
         $this->hasMany("id", "Models\Core\PersonsDetails", "country_id");
 
     }

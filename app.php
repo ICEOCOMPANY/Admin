@@ -46,13 +46,6 @@ $app->put("/users/password", function() use ($app){
     $app->response = (new \Controllers\Core\Users())->resetPasswordPUT();
 });
 
-$app->get("/user/details", function() use ($app){
-
-    $app->response = (new \Controllers\Core\Users())->detailsAction();
-
-});
-
-
 /**
  * GROUPS
  */
@@ -115,6 +108,13 @@ $app->delete("/api",function() use ($app){
 });
 $app->get("/apilogin",function() use ($app){
     $app->response = (new \Controllers\Core\Api($app))->loginViaApi();
+});
+
+/**
+ * Admin
+ */
+$app->get("/admin/user/details", function() use ($app){
+    $app->response = (new \Controllers\Admin\Users())->detailsAction();
 });
 
 
