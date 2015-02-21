@@ -1,5 +1,7 @@
 <?php
 
+namespace Models\Admin;
+
 class AdminLogs extends \Phalcon\Mvc\Model
 {
 

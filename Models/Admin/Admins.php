@@ -1,5 +1,7 @@
 <?php
 
+namespace Models\Admin;
+
 class Admins extends \Phalcon\Mvc\Model
 {
 
