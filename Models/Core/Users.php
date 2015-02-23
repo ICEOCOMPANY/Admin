@@ -55,6 +55,8 @@ class Users extends \Phalcon\Mvc\Model
         );
 
         $this->hasOne("id", "Models\Core\PersonsDetails", "user_id",array('alias' => 'details'));
+        $this->hasMany("id", "Moddels\Support\SupportTicketsContents", "user_id");
+        $this->hasMany("id", "Moddels\Support\SupportTickets", "user_id");
     }
 
     /**

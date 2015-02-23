@@ -38,7 +38,8 @@ class Admins extends \Phalcon\Mvc\Model
     public function initialize(){
 
         $this->setSource("admins");
-        $this->hasMany("id", "Models\Core\AdminLogs", "admin_id", array("alias", "logs"));
+        $this->hasMany("id", "Models\Admin\AdminLogs", "admin_id", array("alias", "logs"));
+        $this->hasMany("id", "Models\Support\SupportTicketsContents", "admin_id");
 
     }
 

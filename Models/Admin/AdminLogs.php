@@ -32,7 +32,7 @@ class AdminLogs extends \Phalcon\Mvc\Model
     public function initialize(){
 
         $this->setSource("admin_logs");
-        $this->belongsTo("admin_id", "Models\Core\Admins", "id", array("alias", "admin"));
+        $this->belongsTo("admin_id", "Models\Admin\Admins", "id", array("alias" => "admin"));
 
     }
 
