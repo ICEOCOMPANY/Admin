@@ -113,10 +113,22 @@ $app->get("/apilogin",function() use ($app){
 /**
  * Admin
  */
+// Tworzy nowego uzytkownika
+$app->post("/admin/admins",function() use ($app){
+    $app->response = (new \Controllers\Admin\Auth())->create();
+});
+
 $app->get("/admin/user/details", function() use ($app){
     $app->response = (new \Controllers\Admin\Users())->detailsAction();
 });
-
+// Loguje uzytkownika
+$app->post("/admin/auth",function() use ($app){
+    $app->response = (new \Controllers\Admin\Auth($app))->createToken();
+});
+// Jesli uzytkownik jest zalogowany, to zwraca adres e-mail
+$app->get("/admin/auth",function() use ($app){
+    $app->response = (new \Controllers\Admin\Auth($app))->getCurrentAdmin();
+});
 
 /**
  * Not found handler

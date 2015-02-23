@@ -31,10 +31,16 @@ abstract class Controller{
      */
     protected $permissions;
 
+    /**
+     * @var \Configs\Admin\Premissions
+     */
+    protected $adminPermissions;
+
     public function __construct($app = false){
         $this->request = new \Helpers\Request();
         $this->response = new \Helpers\Response();
         $this->permissions = new \Configs\Core\Permissions();
+        $this->adminPermissions = new \Configs\Admin\Permissions();
 
 
         /**
@@ -75,6 +81,10 @@ abstract class Controller{
     public function getPermissions()
     {
         return $this->permissions;
+    }
+
+    public function getAdminPermissions(){
+        return $this->adminPermissions;
     }
 
 

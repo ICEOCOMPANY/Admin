@@ -1,12 +1,13 @@
 <?php
+
 /**
  * Created by PhpStorm.
  * Author: dawid
  * Date: 30.01.15
  * Time: 16:29
  */
-
-class UserDi{
+class UserDi
+{
 
     private $currentUserId = -1;
     private $loggedViaApiKeys = false;
@@ -16,24 +17,23 @@ class UserDi{
      * @param bool $forceReCache
      * @return bool|int
      */
-    public function getId($forceReCache = false){
-        if($this->currentUserId === -1 || $forceReCache){
+    public function getId($forceReCache = false)
+    {
+        if ($this->currentUserId === -1 || $forceReCache) {
             $id = (new \Controllers\Core\Auth())->getCurrentUserId();
 
-            if(!$id){
+            if (!$id) {
                 $api = (new \Controllers\Core\Api())->loginViaApi();
-                if($api){
+                if ($api) {
                     $this->currentUserId = $api['id'];
                     $this->apiPermissions = $api['permissions'];
                     $this->loggedViaApiKeys = true;
                 }
 
-            }else{
+            } else {
                 $this->loggedViaApiKeys = false;
                 $this->currentUserId = $id;
             }
-
-
 
 
         }
@@ -46,9 +46,10 @@ class UserDi{
      * @param bool $forceReCache
      * @return \Models\Core\Users
      */
-    public function getModel($forceReCache = false){
+    public function getModel($forceReCache = false)
+    {
 
-        if($this->currentUserModel === -1 || $forceReCache)
+        if ($this->currentUserModel === -1 || $forceReCache)
             $this->currentUserModel = \Models\Core\Users::findFirstById(
                 $this->getId($forceReCache)
             );
@@ -56,9 +57,10 @@ class UserDi{
         return $this->currentUserModel;
     }
 
-    public function getPermissions(){
+    public function getPermissions()
+    {
 
-        if($this->getLoggedViaApiKeys())
+        if ($this->getLoggedViaApiKeys())
             return $this->apiPermissions;
         else
             return $this->getModel()->getPermissions();
@@ -66,8 +68,9 @@ class UserDi{
 
     }
 
-    public function checkPermission($key){
-        return in_array($key,$this->getPermissions());
+    public function checkPermission($key)
+    {
+        return in_array($key, $this->getPermissions());
     }
 
     /**
@@ -75,18 +78,71 @@ class UserDi{
      */
     public function getLoggedViaApiKeys()
     {
-        if($this->getId())
+        if ($this->getId())
             return $this->loggedViaApiKeys;
         return false;
     }
 
 
+}
+
+class AdminDI
+{
+
+    private $currentUserId = -1;
+
+    /**
+     * @param bool $forceReCache
+     * @return bool|int
+     */
+    public function getId($forceReCache = false)
+    {
+        if ($this->currentUserId === -1 || $forceReCache) {
+            $id = (new \Controllers\Admin\Auth())->getCurrentAdminId();
+            $this->currentUserId = $id;
+        }
+        return $this->currentUserId;
+    }
+
+    private $currentUserModel = -1;
+
+    /**
+     * @param bool $forceReCache
+     * @return \Models\Core\Users
+     */
+    public function getModel($forceReCache = false)
+    {
+
+        if ($this->currentUserModel === -1 || $forceReCache)
+            $this->currentUserModel = \Models\Admin\Admins::findFirstById(
+                $this->getId($forceReCache)
+            );
+
+        return $this->currentUserModel;
+    }
+
+    public function getPermissions()
+    {
+        return $this->getModel()->getPermissions();
+    }
+
+    public function checkPermission($key)
+    {
+        return in_array($key, $this->getPermissions());
+    }
 
 }
 
 /**
  * Wstrzyknięcie obiektu user w globalny DI $app z lazy loadem.
  */
-$app->getDI()->set("user",function(){
+$app->getDI()->set("user", function () {
     return new UserDi();
+});
+
+/**
+ * Wstrzyknięcie obiektu user w globalny DI $app z lazy loadem.
+ */
+$app->getDI()->set("admin", function () {
+    return new AdminDI();
 });

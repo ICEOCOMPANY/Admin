@@ -2,6 +2,8 @@
 
 namespace Models\Admin;
 
+use Phalcon\Mvc\Model\Validator\Uniqueness as Uniqueness;
+
 class Admins extends \Phalcon\Mvc\Model
 {
 
@@ -23,11 +25,9 @@ class Admins extends \Phalcon\Mvc\Model
      */
     protected $password;
 
-    /**
-     *
-     * @var integer
-     */
     protected $permissions;
+
+    protected $config = false;
 
     /**
      *
@@ -36,9 +36,11 @@ class Admins extends \Phalcon\Mvc\Model
     protected $active;
 
     public function initialize(){
+        $this->config = new \Configs\Admin\Admins();
 
         $this->setSource("admins");
-        $this->hasMany("id", "Models\Admin\AdminLogs", "admin_id", array("alias", "logs"));
+        $this->hasMany("id", "Models\Admin\AdminLogs", "admin_id");
+        $this->hasMany("id", "Models\Admin\AdminTokens", "admin_id");
         $this->hasMany("id", "Models\Support\SupportTicketsContents", "admin_id");
 
     }
@@ -52,8 +54,6 @@ class Admins extends \Phalcon\Mvc\Model
     public function setId($id)
     {
         $this->id = $id;
-
-        return $this;
     }
 
     /**
@@ -65,8 +65,6 @@ class Admins extends \Phalcon\Mvc\Model
     public function setLogin($login)
     {
         $this->login = $login;
-
-        return $this;
     }
 
     /**
@@ -77,22 +75,20 @@ class Admins extends \Phalcon\Mvc\Model
      */
     public function setPassword($password)
     {
-        $this->password = $password;
-
-        return $this;
+        if(strlen($password) <= $this->config->getMinPasswordLength()){
+            return NULL;
+        } else {
+            $this->password = \password_hash($password, PASSWORD_DEFAULT);
+            return $this;
+        }
     }
 
     /**
-     * Method to set the value of field permissions
-     *
-     * @param integer $permissions
-     * @return $this
+     * @param array $permissions
      */
     public function setPermissions($permissions)
     {
         $this->permissions = $permissions;
-
-        return $this;
     }
 
     /**
@@ -104,8 +100,6 @@ class Admins extends \Phalcon\Mvc\Model
     public function setActive($active)
     {
         $this->active = $active;
-
-        return $this;
     }
 
     /**
@@ -141,12 +135,31 @@ class Admins extends \Phalcon\Mvc\Model
     /**
      * Returns the value of field permissions
      *
-     * @return integer
+     * @return array
      */
     public function getPermissions()
     {
         return $this->permissions;
     }
+
+    /**
+     * Validations and business logic
+     */
+    public function validation()
+    {
+        $this->validate(
+            new Uniqueness(
+                array(
+                    'field' => 'login'
+                )
+            )
+        );
+
+        if ($this->validationHasFailed() == true) {
+            return false;
+        }
+    }
+
 
     /**
      * Returns the value of field active
@@ -156,6 +169,21 @@ class Admins extends \Phalcon\Mvc\Model
     public function getActive()
     {
         return $this->active;
+    }
+
+    public function beforeSave(){
+        $this->permissions = join(",",$this->permissions);
+    }
+
+    public function afterFetch(){
+        if($this->permissions == "")
+            $this->permissions = array();
+        else
+            $this->permissions = explode(",",$this->permissions);
+    }
+
+    public function checkPermission($key){
+        return in_array($key,$this->permissions);
     }
 
     /**
