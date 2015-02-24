@@ -45,7 +45,7 @@ class Auth extends \Base\Controller
      * Logowanie
      * @return \Helpers\Response
      */
-    public function createToken(){
+    public function createTokenAction(){
 
         $login =  $this->request->getPostVar("login");
         $password = $this->request->getPostVar("password");
@@ -174,6 +174,40 @@ class Auth extends \Base\Controller
                 ->setJsonErrors(array(
                     $this->config->getMsgByCode(3)
                 ));
+
+        return $this->response;
+    }
+
+    public function destroyTokenAction(){
+
+        $token = $this->request->getHeaderMod('Authorization');
+
+        if(!$token){
+            $this->response
+                ->setCode(405)
+                ->setJsonErrors(array(
+                    $this->config->getMsgByCode(4)
+                ));
+        }
+
+        $tokenModel = \Models\Admin\AdminTokens::findFirst(array(
+            "token = :token:",
+            "bind" => array("token" =>  $token)
+        ));
+
+        if(!$tokenModel)
+            $this->response
+                ->setCode(405)
+                ->setJsonErrors(array(
+                    $this->config->getMsgByCode(5)
+                ));
+        elseif( $tokenModel->delete() )
+            $this->response->setConfirmOperationMessage(
+                $this->config->getMsgByCode(6)
+            );
+        else
+            $this->response->setCode(503);
+
 
         return $this->response;
     }

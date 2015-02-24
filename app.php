@@ -1,13 +1,5 @@
 <?php
 
-/**
- * AUTH
- */
-// Loguje uzytkownika
-$app->post("/auth",function() use ($app){
-    $app->response = (new \Controllers\Core\Auth($app))->createToken();
-});
-
 // Wylogowywuje uzytkownika
 $app->delete("/auth",function() use ($app){
     $app->response = (new \Controllers\Core\Auth($app))->destroyToken();
@@ -110,24 +102,34 @@ $app->get("/apilogin",function() use ($app){
     $app->response = (new \Controllers\Core\Api($app))->loginViaApi();
 });
 
+//========== ADMIN ==========//
+
 /**
- * Admin
+ * Admin Auth
  */
-// Tworzy nowego uzytkownika
+// Tworzy nowego admina
 $app->post("/admin/admins",function() use ($app){
     $app->response = (new \Controllers\Admin\Auth())->create();
 });
-
-$app->get("/admin/user/details", function() use ($app){
-    $app->response = (new \Controllers\Admin\Users())->detailsAction();
-});
-// Loguje uzytkownika
+// Loguje admina
 $app->post("/admin/auth",function() use ($app){
-    $app->response = (new \Controllers\Admin\Auth($app))->createToken();
+    $app->response = (new \Controllers\Admin\Auth($app))->createTokenAction();
 });
-// Jesli uzytkownik jest zalogowany, to zwraca adres e-mail
+// Jesli admin jest zalogowany, to zwraca adres e-mail
 $app->get("/admin/auth",function() use ($app){
     $app->response = (new \Controllers\Admin\Auth($app))->getCurrentAdmin();
+});
+// Wylogowywuje admina
+$app->delete("/admin/auth",function() use ($app){
+    $app->response = (new \Controllers\Admin\Auth($app))->destroyTokenAction();
+});
+
+/**
+ * Manage users
+ */
+//Zwraca listę userów wraz z danymi
+$app->get("/admin/user/details", function() use ($app){
+    $app->response = (new \Controllers\Admin\Users())->detailsAction();
 });
 
 /**
