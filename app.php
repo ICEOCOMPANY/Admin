@@ -128,8 +128,8 @@ $app->delete("/admin/auth",function() use ($app){
  * Manage users
  */
 //Zwraca listę userów wraz z danymi
-$app->get("/admin/user/details", function() use ($app){
-    $app->response = (new \Controllers\Admin\Users())->detailsAction();
+$app->get("/admin/users", function() use ($app){
+    $app->response = (new \Controllers\Admin\Users())->usersListAction();
 });
 
 /**

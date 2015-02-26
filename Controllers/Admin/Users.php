@@ -12,6 +12,41 @@ namespace Controllers\Admin;
 class Users extends \Base\Controller
 {
 
+    public function usersListAction(){
+
+        $logged_user = (new \Controllers\Admin\Auth())->getCurrentAdminId();
+
+        // Sprawdzam, czy zalogowany
+        if (!$logged_user) {
+
+            // Not logged in - return error
+            $this->response
+                ->setCode(401)
+                ->setJsonErrors(array(\Helpers\Messages::notLoggedError));
+
+        }else{
+
+            $users =  \Models\Core\Users::find();
+
+            $result = [];
+            foreach($users as $user){
+
+                array_push($result, array(
+                    "email" => $user->getEmail(),
+                    "registered" => $user->getRegistered(),
+                    "active" => $user->getActive()
+                ));
+
+            }
+
+            $this->response->setCode(200)->setJson($result);
+
+        }
+
+        return $this->response;
+
+    }
+
     /**
      * GET
      * Pobieranie szczegołowych danych o użytkowniku
